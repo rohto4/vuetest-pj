@@ -1,0 +1,176 @@
+最小単位で構築
+（vue create sample-vue-projectコマンド実施時のカスタム内容はdefaultにして無視）
+https://qiita.com/hisayuki/items/8cf2396f122ca6e452ee
+
+◆
+初期環境
+node # 12.16.2
+npm # 6.14.4
+yarn # 1.22.4
+
+追加環境
+@vue/cli 4.3.1
+
+◆
+$ yarn global add @vue/cli
+$ yarn global add @vue/cli-init
+$ vue --version
+
+①失敗
+$ vue init webpack vuetest-pj
+>> エラー
+  Command vue init requires a global addon to be installed.
+  Please run yarn global add @vue/cli-init and try again.
+  >>◎原因 @vue/cliにデフォルトでinitコマンドが含まれなくなったため
+    ◎解決 $ yarn global add @vue/cli-init
+    ◎     $ npm install -g @vue/cli-init
+
+②成功
+$ vue create vuetest-pj
+(default)
+
+$ cd vuetest-pj
+◆中身を確認
+
+## Vue.jsとは関係ないファイル
+.git       # git 管理ファイル
+.gitignore # gitで管理しないファイルを定義
+README.md
+##
+babel.config.js
+package.json
+package-lock.json
+
+node_modules # 自動生成モジュール 弄らなくていいはず
+└いっぱい
+
+public  # 公開されるディレクトリ
+├favicon.ico
+└index.html
+src  #
+│└assets
+│ └logo.png
+│└components
+│ └HelloWorld.vue
+│├App.vue
+│└main.js
+
+
+どちらかでテスト実行
+$ npm run serve
+$ yarn serve
+
+
+◆webpackから再開
+vue init webpack vuetest-pj
+>> vuetest-pjフォルダが追加される
+  >> 以後の作業はすべてこの中
+  Vueファイルを作成
+  ・Signin.vue
+  ・Signup.vue
+
+>> router/index.jsに、Signin.vue/Signup.vueを使用する記述を追加
+-----
+◇router/index.js
+export default new Router({
+  routes: [
+      ~略~
+    {
+      path: '/signup',
+      name: 'Signup',
+      component: Signup
+    },
+    {
+      path: '/signin',
+      name: 'Signin',
+      component: Signin
+    }
+  ]
+})
+-----
+
+>> Firebase Consoleでプロジェクトを作成
+  アプリを追加
+>> firebaseに接続する文を追加
+-----
+◇main.js
+  import firebase from 'firebase'
+  const config = {
+    apiKey: 'YOUR_KEY',
+    authDomain: 'YOUR_DOMAIN.firebaseapp.com',
+    databaseURL: 'YOUR_DOMAIN.firebaseio.com',
+    projectId: 'YOUR_ID',
+    storageBucket: 'YOUR_BUCKET_ID.appspot.com',
+    messagingSenderId: 'YOUR_SENDER_ID'
+  }
+  firebase.initializeApp(config);
+-----
+
+>> Firebase Console Authentication
+  ログイン方法を追加
+  メールとパスワード > 有効
+
+>> 登録/認証の処理を追加
+◇Signup.vue
+-----
+<button @click="signUp">Register</button>
+~~
+import firebase from 'firebase'
+export default {
+  methods: {
+    signUp: function () {
+      firebase.auth().createUserWithEmailAndPassword(this.username, this.password)
+        .then(user => {
+          alert('Create account: ', user.email)
+        })
+        .catch(error => {
+          alert(error.message)
+        })
+    }
+  }
+}
+-----
+
+◇Signin.vue
+-----
+<button @click="signIn">Signin</button>
+~~
+import firebase from 'firebase'
+export default {
+  methods: {
+    signIn: function () {
+      firebase.auth().signInWithEmailAndPassword(this.username, this.password)
+        .then(user => {
+          alert('Success!')
+          this.$router.push('/')
+        },
+        error => {
+          alert(error.message)
+        }
+      )
+    }
+  }
+}
+-----
+
+>> npm run dev 確認
+アドレス & パスワードを入力
+>> Success!!が表示されたらテストは成功
+
+◆firebaseのhosting機能を使用してアプリを公開する
+>> プロジェクトのルートディレクトリに、firebase.jsonを作成
+
+firebase.json
+-----
+{
+  "hosting": {
+    # 公開するディレクトリを指定
+    "public": "public"
+  }
+}
+-----
+
+>> ローカルに反映された変更
+
+$ npm install -g firebase-tools
+$ firebase

@@ -1,0 +1,49 @@
+初期環境
+node # 12.16.2
+npm # 6.14.4
+yarn # 1.22.4
+
+$ yarn global add @vue/cli
+$ yarn global add @vue/cli-init
+$ vue --version
+
+①失敗
+$ vue init webpack vue-app
+>>
+  Command vue init requires a global addon to be installed.
+  Please run yarn global add @vue/cli-init and try again.
+
+②成功
+$ vue create vuetest-pj
+(default)
+
+$ cd vuetest-pj
+◆中身を確認
+
+## Vue.jsとは関係ないファイル
+.git       # git 管理ファイル
+.gitignore # gitで管理しないファイルを定義
+README.md
+##
+babel.config.js
+package.json
+package-lock.json
+
+node_modules # 自動生成モジュール 弄らなくていいはず
+└いっぱい
+
+public  # 公開されるディレクトリ
+├favicon.ico
+└index.html
+src  #
+│└assets
+│ └logo.png
+│└components
+│ └HelloWorld.vue
+│├App.vue
+│└main.js
+
+
+どちらかでテスト実行
+$ npm run serve
+$ yarn serve
